@@ -6,6 +6,14 @@ class Lexer {
     private var start: Int = 0
     private var current: Int = 0
     private var line: Int = 1
+
+    private var isAtEnd: Bool {
+        current >= characters.count
+    }
+    
+    private var currentLexeme: String {
+        String(characters[start..<current])
+    }
     
     static let keywords: [String: TokenType] = [
         "and": .and,
@@ -51,22 +59,6 @@ class Lexer {
         return tokens
     }
 
-    private var isAtEnd: Bool {
-        current >= characters.count
-    }
-
-    private var peek: Character {
-        characters.indices.contains(current) ? characters[current] : "\0"
-    }
-
-    private var peekNext: Character {
-        characters.indices.contains(current + 1) ? characters[current + 1] : "\0" 
-    }
-
-    private var currentLexeme: String {
-        String(characters[start..<current])
-    }
-
     private func scanToken() -> Void {
         let c: Character = advance()
         
@@ -82,7 +74,7 @@ class Lexer {
         case "*": addToken(.star)
         case "/":
             if match("/") {
-                while peek != "\n" && !isAtEnd {
+                while peek() != "\n" && !isAtEnd {
                     _ = advance()
                 }
             } else {
@@ -125,9 +117,18 @@ class Lexer {
         return true
     }
 
+    private func peek(by offset: Int = 0) -> Character {
+        let index = current + offset
+        guard index >= 0 && index < characters.count else {
+            return "\0"
+        }
+
+        return characters[index]
+    }
+
     private func string() -> Void {
-        while peek != "\"" && !isAtEnd {
-            if peek == "\n" {
+        while peek() != "\"" && !isAtEnd {
+            if peek() == "\n" {
                 line += 1
             }
 
@@ -146,14 +147,14 @@ class Lexer {
     }
 
     private func number() -> Void {
-        while peek.isWholeNumber {
+        while peek().isWholeNumber {
             _ = advance()
         }
 
-        if peek == "." && peekNext.isWholeNumber {
+        if peek() == "." && peek(by: 1).isWholeNumber {
             repeat {
                 _ = advance()
-            } while peek.isWholeNumber
+            } while peek().isWholeNumber
         }
 
         addToken(.number, literal: Double(currentLexeme))
@@ -161,7 +162,7 @@ class Lexer {
     }
 
     private func identifier() -> Void {
-        while peek.isLetter || peek.isWholeNumber || peek == "_" {
+        while peek().isLetter || peek().isWholeNumber || peek() == "_" {
             _ = advance()
         }
         
