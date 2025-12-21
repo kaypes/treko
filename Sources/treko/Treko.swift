@@ -51,8 +51,8 @@ enum Treko {
     }
 
     private static func run(source: String) {
-        let scanner: Scanner = Scanner(source: source)
-        let tokens: [Token] = scanner.scanTokens()
+        let lexer: Lexer = Lexer(source: source)
+        let tokens: [Token] = lexer.scanTokens()
 
         for token in tokens {
             print(token)
@@ -63,7 +63,7 @@ enum Treko {
         }
     }
 
-    private static func error(line: Int, message: String) -> Void {
+    static func error(line: Int, message: String) -> Void {
         report(line: line, location: "", message: message)
     }
 
