@@ -8,7 +8,7 @@ class Lexer {
     private var line: Int = 1
 
     private var isAtEnd: Bool {
-        current >= characters.count
+        !characters.indices.contains(current)
     }
     
     private var currentLexeme: String {
@@ -111,8 +111,8 @@ class Lexer {
     }
 
     private func peek(by offset: Int = 0) -> Character {
-        let index = current + offset
-        guard index >= 0 && index < characters.count else {
+        let index: Int = current + offset
+        guard characters.indices.contains(index) else {
             return "\0"
         }
 
