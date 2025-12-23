@@ -54,7 +54,7 @@ struct Lexer {
     }
 
     mutating private func scanToken() {
-        let scalar: UnicodeScalar = advance()
+        let scalar = advance()
 
         switch scalar {
         case "(": addToken(.leftParen)
@@ -109,7 +109,7 @@ struct Lexer {
     }
 
     private func peek(by offset: Int = 0) -> UnicodeScalar {
-        let index: Int = current + offset
+        let index = current + offset
         guard scalars.indices.contains(index) else {
             return "\0"
         }

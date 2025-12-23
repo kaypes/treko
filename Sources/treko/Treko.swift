@@ -66,7 +66,7 @@ enum Treko {
     }
 
     private static func report(line: Int, location: String, message: String) {
-        let reportString: String = "[line \(line)] Error \(location): \(message)\n"
+        let reportString = "[line \(line)] Error \(location): \(message)\n"
         
         if let data = reportString.data(using: .utf8) {
             try? FileHandle.standardError.write(contentsOf: data)
