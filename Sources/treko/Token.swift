@@ -1,7 +1,13 @@
+enum LiteralValue {
+    case number(Double)
+    case string(String)
+    case bool(Bool)
+    case none
+}
 struct Token {
     let type: TokenType
     let lexeme: String
-    let literal: Any?
+    let literal: LiteralValue
     let line: Int
 }
 

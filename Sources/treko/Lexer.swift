@@ -1,18 +1,18 @@
 @MainActor
 class Lexer {
     private let source: String
-    private let characters: [Character]
+    private let scalars: [UnicodeScalar]
     private var tokens: [Token] = []
     private var start: Int = 0
     private var current: Int = 0
     private var line: Int = 1
 
     private var isAtEnd: Bool {
-        !characters.indices.contains(current)
+        current >= scalars.count
     }
     
     private var currentLexeme: String {
-        String(characters[start..<current])
+        String(String.UnicodeScalarView(scalars[start..<current]))
     }
     
     static let keywords: [String: TokenType] = [
@@ -41,7 +41,7 @@ class Lexer {
     
     init(source: String) {
         self.source = source
-        self.characters = Array(source)
+        self.scalars = Array(source.unicodeScalars)
     }
 
     func scanTokens() -> [Token] {
@@ -50,14 +50,14 @@ class Lexer {
             scanToken()            
         }
 
-        tokens.append(Token(type: .eof, lexeme: "", literal: nil, line: line))
+        tokens.append(Token(type: .eof, lexeme: "", literal: .none, line: line))
         return tokens
     }
 
     private func scanToken() -> Void {
-        let c: Character = advance()
+        let s: UnicodeScalar = advance()
         
-        switch c {
+        switch s {
         case "(": addToken(.leftParen)
         case ")": addToken(.rightParen)
         case "{": addToken(.leftBrace)
@@ -80,29 +80,27 @@ class Lexer {
         case "!": addToken(match("=") ? .bangEqual : .bang)
         case ">": addToken(match("=") ? .greaterEqual : .greater)
         case "<": addToken(match("=") ? .lessEqual : .less)
-        case _ where c.isWhitespace:
-            if c.isNewline {
-                line += 1
-            }
-        case _ where c.isLetter || c == "_": identifier()
-        case _ where c.isWholeNumber: number()
+        case " ", "\r", "\t": break
+        case "\n": line += 1
         case "\"": string()
+        case "0"..."9": number()
+        case "a"..."z", "A"..."Z", "_": identifier()
         default: Treko.error(line: line, message: "Unexpected character.")
         }
     }
 
-    private func addToken(_ type: TokenType, literal: Any? = nil) -> Void {
+    private func addToken(_ type: TokenType, literal: LiteralValue = .none) -> Void {
         tokens.append(Token(type: type, lexeme: currentLexeme, literal: literal, line: line))
     }
 
-    private func advance() -> Character {
-        let char: Character = characters[current]
+    private func advance() -> UnicodeScalar {
+        let scalar: UnicodeScalar = scalars[current]
         current += 1
-        return char
+        return scalar
     }
 
-    private func match(_ expected: Character) -> Bool {
-        guard !isAtEnd, characters[current] == expected else {
+    private func match(_ expected: UnicodeScalar) -> Bool {
+        guard !isAtEnd, scalars[current] == expected else {
             return false
         }
 
@@ -110,13 +108,13 @@ class Lexer {
         return true
     }
 
-    private func peek(by offset: Int = 0) -> Character {
+    private func peek(by offset: Int = 0) -> UnicodeScalar {
         let index: Int = current + offset
-        guard characters.indices.contains(index) else {
+        guard scalars.indices.contains(index) else {
             return "\0"
         }
 
-        return characters[index]
+        return scalars[index]
     }
 
     private func string() -> Void {
@@ -135,30 +133,48 @@ class Lexer {
 
         _ = advance()
 
-        let value: String = String(characters[(start + 1)..<(current - 1)])
-        addToken(.string, literal: value)
+        let value: String = String(String.UnicodeScalarView(scalars[(start + 1)..<(current - 1)]))
+        addToken(.string, literal: .string(value))
     }
 
     private func number() -> Void {
-        while peek().isWholeNumber {
+        while isDigit(peek()) {
             _ = advance()
         }
 
-        if peek() == "." && peek(by: 1).isWholeNumber {
+        if peek() == "." && isDigit(peek(by: 1)) {
             repeat {
                 _ = advance()
-            } while peek().isWholeNumber
+            } while isDigit(peek())
         }
 
-        addToken(.number, literal: Double(currentLexeme))
+        addToken(.number, literal: .number(Double(currentLexeme)!))
     }
 
     private func identifier() -> Void {
-        while peek().isLetter || peek().isWholeNumber || peek() == "_" {
+        while isAlphaNumeric(peek()) {
             _ = advance()
         }
         
         let type: TokenType = Lexer.keywords[currentLexeme] ?? .identifier
-        addToken(type)
+
+        switch type {
+        case .true: addToken(.true, literal: .bool(true))
+        case .false: addToken(.false, literal: .bool(false))
+        case .nil: addToken(.nil, literal: .none)
+        default: addToken(type)
+        }
     }
+
+    private func isDigit(_ scalar: UnicodeScalar) -> Bool {
+        return scalar >= "0" && scalar <= "9"
+    }
+
+    private func isAlphaNumeric(_ scalar: UnicodeScalar) -> Bool {
+        return (scalar >= "a" && scalar <= "z") ||
+               (scalar >= "A" && scalar <= "Z") ||
+               (scalar >= "0" && scalar <= "9") ||
+                scalar == "_"
+    }
+    
 }
