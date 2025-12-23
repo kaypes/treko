@@ -55,7 +55,7 @@ struct Lexer {
     }
 
     mutating private func scanToken() {
-        let scalar = advance()
+        let scalar: UnicodeScalar = advance()
 
         switch scalar {
         case "(": addToken(.leftParen)
@@ -149,7 +149,8 @@ struct Lexer {
             } while isDigit(peek())
         }
 
-        addToken(.number, literal: .number(Double(currentLexeme)!))
+        let value = Double(currentLexeme) ?? 0.0
+        addToken(.number, literal: .number(value))
     }
 
     mutating private func identifier() {
