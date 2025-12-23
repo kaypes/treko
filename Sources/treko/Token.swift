@@ -5,7 +5,7 @@ struct Token {
     let line: Int
 }
 
-extension Token : CustomStringConvertible {
+extension Token: CustomStringConvertible {
     var description: String {
         "\(type) \(lexeme) \(String(describing: literal))"
     }
