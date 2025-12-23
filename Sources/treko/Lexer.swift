@@ -22,23 +22,18 @@ class Lexer {
         "elsif": .elsif,
         "else": .else,
         "unless": .unless,
-
         "class": .class,
         "this": .this,
         "super": .super,
-
         "var": .var,
         "let": .let,
-
         "fun": .fun,
         "print": .print,
         "return": .return,
-
         "loop": .loop,
         "while": .while,
         "for": .for,
         "until": .until,
-
         "true": .true,
         "false": .false,
         "nil": .nil
@@ -80,13 +75,11 @@ class Lexer {
             } else {
                 addToken(.slash)
             }
-
         case ";": addToken(.semicolon)
         case "=": addToken(match("=") ? .equalEqual : .equal)
         case "!": addToken(match("=") ? .bangEqual : .bang)
         case ">": addToken(match("=") ? .greaterEqual : .greater)
         case "<": addToken(match("=") ? .lessEqual : .less)
-        
         case _ where c.isWhitespace:
             if c.isNewline {
                 line += 1
@@ -158,7 +151,6 @@ class Lexer {
         }
 
         addToken(.number, literal: Double(currentLexeme))
-
     }
 
     private func identifier() -> Void {
