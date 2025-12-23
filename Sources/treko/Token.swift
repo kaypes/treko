@@ -4,6 +4,7 @@ enum LiteralValue {
     case bool(Bool)
     case none
 }
+
 struct Token {
     let type: TokenType
     let lexeme: String

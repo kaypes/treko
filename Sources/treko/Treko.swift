@@ -49,7 +49,7 @@ enum Treko {
     }
 
     private static func run(source: String) {
-        let lexer: Lexer = Lexer(source: source)
+        var lexer: Lexer = Lexer(source: source)
         let tokens: [Token] = lexer.scanTokens()
 
         for token in tokens {

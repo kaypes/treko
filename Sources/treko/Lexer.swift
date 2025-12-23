@@ -1,5 +1,5 @@
 @MainActor
-class Lexer {
+struct Lexer {
     private let source: String
     private let scalars: [UnicodeScalar]
     private var tokens: [Token] = []
@@ -44,7 +44,7 @@ class Lexer {
         self.scalars = Array(source.unicodeScalars)
     }
 
-    func scanTokens() -> [Token] {
+    mutating func scanTokens() -> [Token] {
         while !isAtEnd {
             start = current
             scanToken()
@@ -54,7 +54,7 @@ class Lexer {
         return tokens
     }
 
-    private func scanToken() {
+    mutating private func scanToken() {
         let scalar = advance()
 
         switch scalar {
@@ -90,17 +90,17 @@ class Lexer {
         }
     }
 
-    private func addToken(_ type: TokenType, literal: LiteralValue = .none) {
+    mutating private func addToken(_ type: TokenType, literal: LiteralValue = .none) {
         tokens.append(Token(type: type, lexeme: currentLexeme, literal: literal, line: line))
     }
 
-    private func advance() -> UnicodeScalar {
+    mutating private func advance() -> UnicodeScalar {
         let scalar = scalars[current]
         current += 1
         return scalar
     }
 
-    private func match(_ expected: UnicodeScalar) -> Bool {
+    mutating private func match(_ expected: UnicodeScalar) -> Bool {
         guard !isAtEnd, scalars[current] == expected else {
             return false
         }
@@ -118,7 +118,7 @@ class Lexer {
         return scalars[index]
     }
 
-    private func string() {
+    mutating private func string() {
         while peek() != "\"" && !isAtEnd {
             if peek() == "\n" {
                 line += 1
@@ -138,7 +138,7 @@ class Lexer {
         addToken(.string, literal: .string(value))
     }
 
-    private func number() {
+    mutating private func number() {
         while isDigit(peek()) {
             _ = advance()
         }
@@ -152,7 +152,7 @@ class Lexer {
         addToken(.number, literal: .number(Double(currentLexeme)!))
     }
 
-    private func identifier() {
+    mutating private func identifier() {
         while isAlphaNumeric(peek()) {
             _ = advance()
         }
