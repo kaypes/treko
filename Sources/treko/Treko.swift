@@ -1,32 +1,28 @@
-import Foundation
+#if canImport(Foundation)
+    import Foundation
+#else
+    #error("unsupported platform")
+#endif
 
 @main
 @MainActor
 enum Treko {
     private(set) static var hadError: Bool = false
 
-    public static func main() -> Void {
+    public static func main() throws -> Void {
         switch CommandLine.arguments.count {
         case 1:
-            runPrompt()
+            try runPrompt()
         case 2:
-            runFile(path: CommandLine.arguments[1])
+            try runFile(path: CommandLine.arguments[1])
         default:
-            print("Usage: streko [script]")
+            print("Usage: treko [script]")
             exit(64)
         }
     }
 
-    private static func runFile(path: String) -> Void {
-        guard let content: String = try? String(contentsOfFile: path, encoding: .utf8) else {
-            let errorMsg: String = "Could not read file at \(path)\n"
-            if let data: Data = errorMsg.data(using: .utf8) {
-                try? FileHandle.standardError.write(contentsOf: data)
-            }
-    
-            exit(66)    
-        }
-
+    private static func runFile(path: String) throws -> Void {
+        let content: String = try String(contentsOfFile: path, encoding: .utf8)
         run(source: content)
 
         if hadError {
@@ -34,11 +30,13 @@ enum Treko {
         }
     }
 
-    private static func runPrompt() -> Void {
+    private static func runPrompt() throws -> Void {
+        guard let data: Data = "> ".data(using: .utf8) else {
+            return
+        }
+
         while true {
-            if let data: Data = "> ".data(using: .utf8) {
-                try? FileHandle.standardOutput.write(contentsOf: data)
-            }
+            try FileHandle.standardOutput.write(contentsOf: data)
 
             guard let line: String = readLine() else {
                 print("")
