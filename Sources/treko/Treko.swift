@@ -7,7 +7,7 @@
 @main
 @MainActor
 enum Treko {
-    private(set) static var hadError: Bool = false
+    private(set) static var hadError = false
 
     public static func main() throws {
         switch CommandLine.arguments.count {
@@ -22,7 +22,7 @@ enum Treko {
     }
 
     private static func runFile(path: String) throws {
-        let content: String = try String(contentsOfFile: path, encoding: .utf8)
+        let content = try String(contentsOfFile: path, encoding: .utf8)
         run(source: content)
 
         if hadError {
@@ -31,7 +31,7 @@ enum Treko {
     }
 
     private static func runPrompt() throws {
-        guard let data: Data = "> ".data(using: .utf8) else {
+        guard let data = "> ".data(using: .utf8) else {
             return
         }
 
@@ -49,7 +49,7 @@ enum Treko {
     }
 
     private static func run(source: String) {
-        var lexer: Lexer = Lexer(source: source)
+        var lexer = Lexer(source: source)
         let tokens: [Token] = lexer.scanTokens()
 
         for token in tokens {
@@ -66,9 +66,9 @@ enum Treko {
     }
 
     private static func report(line: Int, location: String, message: String) {
-        let reportString: String = "[line \(line)] Error \(location): \(message)\n"
-        if let data: Data = reportString.data(using: .utf8) {
-            FileHandle.standardError.write(data)
+        let reportString = "[line \(line)] Error \(location): \(message)\n"
+        if let data = reportString.data(using: .utf8) {
+            try? FileHandle.standardError.write(contentsOf: data)
         }
 
         hadError = true
