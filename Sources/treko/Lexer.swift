@@ -3,18 +3,18 @@ class Lexer {
     private let source: String
     private let scalars: [UnicodeScalar]
     private var tokens: [Token] = []
-    private var start: Int = 0
-    private var current: Int = 0
-    private var line: Int = 1
+    private var start = 0
+    private var current = 0
+    private var line = 1
 
     private var isAtEnd: Bool {
         current >= scalars.count
     }
-    
+
     private var currentLexeme: String {
         String(String.UnicodeScalarView(scalars[start..<current]))
     }
-    
+
     static let keywords: [String: TokenType] = [
         "and": .and,
         "or": .or,
@@ -38,7 +38,7 @@ class Lexer {
         "false": .false,
         "nil": .nil
     ]
-    
+
     init(source: String) {
         self.source = source
         self.scalars = Array(source.unicodeScalars)
@@ -47,17 +47,17 @@ class Lexer {
     func scanTokens() -> [Token] {
         while !isAtEnd {
             start = current
-            scanToken()            
+            scanToken()
         }
 
         tokens.append(Token(type: .eof, lexeme: "", literal: .none, line: line))
         return tokens
     }
 
-    private func scanToken() -> Void {
-        let s: UnicodeScalar = advance()
-        
-        switch s {
+    private func scanToken() {
+        let scalar = advance()
+
+        switch scalar {
         case "(": addToken(.leftParen)
         case ")": addToken(.rightParen)
         case "{": addToken(.leftBrace)
@@ -76,6 +76,7 @@ class Lexer {
                 addToken(.slash)
             }
         case ";": addToken(.semicolon)
+        case ":": addToken(.colon)
         case "=": addToken(match("=") ? .equalEqual : .equal)
         case "!": addToken(match("=") ? .bangEqual : .bang)
         case ">": addToken(match("=") ? .greaterEqual : .greater)
@@ -89,12 +90,12 @@ class Lexer {
         }
     }
 
-    private func addToken(_ type: TokenType, literal: LiteralValue = .none) -> Void {
+    private func addToken(_ type: TokenType, literal: LiteralValue = .none) {
         tokens.append(Token(type: type, lexeme: currentLexeme, literal: literal, line: line))
     }
 
     private func advance() -> UnicodeScalar {
-        let scalar: UnicodeScalar = scalars[current]
+        let scalar = scalars[current]
         current += 1
         return scalar
     }
@@ -117,7 +118,7 @@ class Lexer {
         return scalars[index]
     }
 
-    private func string() -> Void {
+    private func string() {
         while peek() != "\"" && !isAtEnd {
             if peek() == "\n" {
                 line += 1
@@ -133,11 +134,11 @@ class Lexer {
 
         _ = advance()
 
-        let value: String = String(String.UnicodeScalarView(scalars[(start + 1)..<(current - 1)]))
+        let value = String(String.UnicodeScalarView(scalars[(start + 1)..<(current - 1)]))
         addToken(.string, literal: .string(value))
     }
 
-    private func number() -> Void {
+    private func number() {
         while isDigit(peek()) {
             _ = advance()
         }
@@ -151,11 +152,11 @@ class Lexer {
         addToken(.number, literal: .number(Double(currentLexeme)!))
     }
 
-    private func identifier() -> Void {
+    private func identifier() {
         while isAlphaNumeric(peek()) {
             _ = advance()
         }
-        
+
         let type: TokenType = Lexer.keywords[currentLexeme] ?? .identifier
 
         switch type {
@@ -176,5 +177,4 @@ class Lexer {
                (scalar >= "0" && scalar <= "9") ||
                 scalar == "_"
     }
-    
 }

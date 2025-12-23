@@ -9,7 +9,7 @@
 enum Treko {
     private(set) static var hadError: Bool = false
 
-    public static func main() throws -> Void {
+    public static func main() throws {
         switch CommandLine.arguments.count {
         case 1:
             try runPrompt()
@@ -21,7 +21,7 @@ enum Treko {
         }
     }
 
-    private static func runFile(path: String) throws -> Void {
+    private static func runFile(path: String) throws {
         let content: String = try String(contentsOfFile: path, encoding: .utf8)
         run(source: content)
 
@@ -30,7 +30,7 @@ enum Treko {
         }
     }
 
-    private static func runPrompt() throws -> Void {
+    private static func runPrompt() throws {
         guard let data: Data = "> ".data(using: .utf8) else {
             return
         }
@@ -61,7 +61,7 @@ enum Treko {
         }
     }
 
-    static func error(line: Int, message: String) -> Void {
+    static func error(line: Int, message: String) {
         report(line: line, location: "", message: message)
     }
 
@@ -70,7 +70,7 @@ enum Treko {
         if let data: Data = reportString.data(using: .utf8) {
             FileHandle.standardError.write(data)
         }
-        
+
         hadError = true
     }
 }

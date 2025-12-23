@@ -1,6 +1,6 @@
 enum TokenType {
     case leftParen, rightParen, leftBrace, rightBrace
-    case comma, dot, semicolon
+    case comma, dot, semicolon, colon
     case minus, plus, slash, star
     case equal, equalEqual, bang, bangEqual, greater, greaterEqual, less, lessEqual
     case identifier, string, number, bool, `true`, `false`, `nil`
