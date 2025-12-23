@@ -1,4 +1,3 @@
-@MainActor
 struct Lexer {
     private let source: String
     private let scalars: [UnicodeScalar]

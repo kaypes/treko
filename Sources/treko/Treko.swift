@@ -5,9 +5,8 @@
 #endif
 
 @main
-@MainActor
 enum Treko {
-    private(set) static var hadError: Bool = false
+    nonisolated(unsafe) private(set) static var hadError = false
 
     public static func main() throws {
         switch CommandLine.arguments.count {
