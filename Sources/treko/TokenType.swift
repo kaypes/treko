@@ -8,6 +8,6 @@ enum TokenType {
     case `class`, this, `super`
     case `var`, `let`
     case fun, `print`, `return`
-    case loop, `while`, `for`, until
+    case `repeat`, `while`, `for`, until
     case eof
 }

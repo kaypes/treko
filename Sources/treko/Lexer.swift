@@ -29,7 +29,7 @@ struct Lexer {
         "fun": .fun,
         "print": .print,
         "return": .return,
-        "loop": .loop,
+        "repeat": .repeat,
         "while": .while,
         "for": .for,
         "until": .until,
