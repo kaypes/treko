@@ -5,7 +5,7 @@
 #endif
 
 @main
-enum Treko {
+struct Treko {
     nonisolated(unsafe) private(set) static var hadError = false
 
     public static func main() throws {
